@@ -29,6 +29,7 @@ grille *creerGrille()
     }
     g->currP = 0;
     g->gameStatus = 0;
+    return g;
 }
 
 void printGrille(grille *g)
@@ -69,9 +70,9 @@ void jouerCoup(grille *g)
     poserJeton(g, action);
 }
 
-char checkVictoire(grille* g, char pos){
+// char checkVictoire(grille* g, char pos){
     
-}
+// }
 
 
 

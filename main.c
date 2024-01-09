@@ -1,11 +1,12 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <assert.h>
 
 typedef struct grille
 {
     char *tab[6];
-    int currP;
+    uint16_t currP;
     uint8_t gameStatus;
 } grille;
 
@@ -14,7 +15,8 @@ void printGrille(grille *g);
 void poserJeton(grille *g, char pos);
 void freeGrille(grille *g);
 char checkVictoire(grille *g, char pos);
-void jouerCoup(grille *g);
+char jouerCoup(grille *g);
+
 
 grille *creerGrille()
 {
@@ -55,26 +57,27 @@ void poserJeton(grille *g, char pos)
         --i;
     }
     g->tab[i][pos - 'A'] = pion[g->currP];
-    g->currP = 1 - g->currP;
 }
 
-void jouerCoup(grille *g)
+char jouerCoup(grille *g)
 {
     char action = 'A';
     printf("Joueur %d à toi de jouer!\n", g->currP + 1);
     scanf(" %c", &action);
+    chercherCoup:
     while ((action > 'G')||(action < 'A')){
         printf("Coup non valide, veillez entrez une lettre entre A et G.\n");
         scanf(" %c", &action);
     }
-    poserJeton(g, action);
-}
-
-// char checkVictoire(grille* g, char pos){
+    if (g->tab[5][action-'A'] != ' ')
+    {
+        printf("Cette colonne est pleine!\n");
+        goto chercherCoup;
+    }
     
-// }
-
-
+    poserJeton(g, action);
+    return action;
+}
 
 
 
@@ -94,15 +97,19 @@ int main()
     char action;
 
     printGrille(g);
+    g->currP = 1 - g->currP;
     while(g->gameStatus == 0){
-        jouerCoup(g);
+        g->currP = 1 - g->currP;
+        action = jouerCoup(g);
         printGrille(g);
-        jouerCoup(g);
-        printGrille(g);
-        printf("Stop?\n");
-        scanf(" %c", &action);
-        if(action == 'S'){
+        if(checkVictoire(g, action) == 'V'){
             g->gameStatus = 1;
+            printf("Bravo, le joueur %d a gagné\n Voulez-vous rejouer? [y/n] \n", g->currP + 1);
+            scanf(" %c", &action);
+            if(action == 'y'){
+                freeGrille(g);
+                g = creerGrille();
+                g->currP = 1 - g->currP;}
         }
     }
     freeGrille(g);

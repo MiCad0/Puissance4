@@ -12,9 +12,10 @@ typedef struct grille
 
 grille *creerGrille();
 void printGrille(grille *g);
-void poserJeton(grille *g, char pos);
+char poserJeton(grille *g, char pos);
 void freeGrille(grille *g);
-char checkVictoire(grille *g, char pos);
+uint8_t checkVictoireRec(grille* g, char side);
+uint8_t interCheckVictoireRec(grille* g,uint8_t i, uint8_t j, uint8_t depth,char side);
 char jouerCoup(grille *g);
 
 
@@ -48,7 +49,7 @@ void printGrille(grille *g)
     printf("=======================\n\n");
 }
 
-void poserJeton(grille *g, char pos)
+char poserJeton(grille *g, char pos)
 {
     uint8_t i = 5;
     char pion[2] = {'X', 'O'};
@@ -57,6 +58,7 @@ void poserJeton(grille *g, char pos)
         --i;
     }
     g->tab[i][pos - 'A'] = pion[g->currP];
+    return pion[g->currP];
 }
 
 char jouerCoup(grille *g)
@@ -69,19 +71,20 @@ char jouerCoup(grille *g)
         printf("Coup non valide, veillez entrez une lettre entre A et G.\n");
         scanf(" %c", &action);
     }
-    if (g->tab[5][action-'A'] != ' ')
+    if (g->tab[0][action-'A'] != ' ')
     {
         printf("Cette colonne est pleine!\n");
+        action = ' ';
         goto chercherCoup;
     }
     
-    poserJeton(g, action);
+    action = poserJeton(g, action);
     return action;
 }
 
 uint8_t checkVictoireRec(grille* g, char side){
-    for(int i = 0; i < 6; i++){
-        for(int j = 0; j < 7; i++){
+    for(uint8_t i = 0; i < 6; i++){
+        for(uint8_t j = 0; j < 7; j++){
             if(interCheckVictoireRec(g,i,j,4,side) > 3){
                 printf("jouerur %c a gagner\n",side);
                 return side;
@@ -92,7 +95,7 @@ uint8_t checkVictoireRec(grille* g, char side){
     return 0;
 }
 
-uint8_t interCheckVictoireRec(grille* g,int i, int j, int depth,char side){
+uint8_t interCheckVictoireRec(grille* g,uint8_t i, uint8_t j, uint8_t depth,char side){
     if(i < 0 || 
         j < 0 ||
         i >= 6 ||
@@ -105,25 +108,26 @@ uint8_t interCheckVictoireRec(grille* g,int i, int j, int depth,char side){
         if(depth == 0){
             return 0;
         }
-    int d[8];
-    int d[0] = interCheckVictoireRec(g,i - 1,j,depth - 1,side );
-    int d[1] = interCheckVictoireRec(g,i + 1,j,depth - 1,side );
-    int d[2] = interCheckVictoireRec(g,i,j - 1,depth - 1,side );
-    int d[3] = interCheckVictoireRec(g,i,j + 1,depth - 1,side );
-    int d[4] = interCheckVictoireRec(g,i - 1,j - 1,depth - 1,side );
-    int d[5] = interCheckVictoireRec(g,i + 1,j + 1,depth - 1,side );
-    int d[6] = interCheckVictoireRec(g,i + 1,j - 1,depth - 1,side );
-    int d[7] = interCheckVictoireRec(g,i - 1,j + 1,depth - 1,side );
+    uint8_t d[8];
+    d[0] = interCheckVictoireRec(g,i - 1,j,depth - 1,side );
+    d[1] = interCheckVictoireRec(g,i + 1,j,depth - 1,side );
+    d[2] = interCheckVictoireRec(g,i,j - 1,depth - 1,side );
+    d[3] = interCheckVictoireRec(g,i,j + 1,depth - 1,side );
+    d[4] = interCheckVictoireRec(g,i - 1,j - 1,depth - 1,side );
+    d[5] = interCheckVictoireRec(g,i + 1,j + 1,depth - 1,side );
+    d[6] = interCheckVictoireRec(g,i + 1,j - 1,depth - 1,side );
+    d[7] = interCheckVictoireRec(g,i - 1,j + 1,depth - 1,side );
     //int d[8] = interCheckVictoireRec(g,i,j,depth - 1,side );
     uint8_t last = 0;
-    for(int i; i < 8; i++){
+    for(uint8_t i = 0; i < 8; i++){
         if(d[i] > last){
             last = d[i];
         }
     }
-    return last;
+    printf("\n%d\n", last);
+    return last+1;
 }
-
+/*
 char checkVictoire(grille* g, char pos){
     uint16_t x;
     uint16_t y = pos - 'A';
@@ -300,7 +304,7 @@ char checkVictoire(grille* g, char pos){
     }
     else return 'N';    
 }
-
+*/
 
 
 
@@ -324,7 +328,7 @@ int main()
         g->currP = 1 - g->currP;
         action = jouerCoup(g);
         printGrille(g);
-        if(checkVictoire(g, action) == 'V'){
+        if(checkVictoireRec(g, action) != 0){
             g->gameStatus = 1;
             printf("Bravo, le joueur %d a gagné\n Voulez-vous rejouer? [y/n] \n", g->currP + 1);
             scanf(" %c", &action);

@@ -85,7 +85,23 @@ char jouerCoup(grille *g)
 uint8_t checkVictoireRec(grille* g, char side){
     for(uint8_t i = 0; i < 6; i++){
         for(uint8_t j = 0; j < 7; j++){
-            if(interCheckVictoireRec(g,i,j,4,side) > 3){
+            if(interCheckVictoireRec(g,i,j,4,side,1,1)
+            + interCheckVictoireRec(g,i,j,4,side,-1,-1) > 3){
+                printf("jouerur %c a gagner\n",side);
+                return side;
+            }  
+            if(interCheckVictoireRec(g,i,j,4,side,0,1)
+            + interCheckVictoireRec(g,i,j,4,side,0,-1) > 3){
+                printf("jouerur %c a gagner\n",side);
+                return side;
+            }  
+            if(interCheckVictoireRec(g,i,j,4,side,1,0)
+            + interCheckVictoireRec(g,i,j,4,side,-1,0) > 3){
+                printf("jouerur %c a gagner\n",side);
+                return side;
+            }
+            if(interCheckVictoireRec(g,i,j,4,side,1,-1)
+            + interCheckVictoireRec(g,i,j,4,side,-1,1) > 3){
                 printf("jouerur %c a gagner\n",side);
                 return side;
             }
@@ -95,7 +111,7 @@ uint8_t checkVictoireRec(grille* g, char side){
     return 0;
 }
 
-uint8_t interCheckVictoireRec(grille* g,uint8_t i, uint8_t j, uint8_t depth,char side){
+uint8_t interCheckVictoireRec(grille* g,uint8_t i, uint8_t j, uint8_t depth,char side,int dir1,int dir2){
     if(i < 0 || 
         j < 0 ||
         i >= 6 ||
@@ -108,23 +124,10 @@ uint8_t interCheckVictoireRec(grille* g,uint8_t i, uint8_t j, uint8_t depth,char
         if(depth == 0){
             return 0;
         }
-    uint8_t d[8];
-    d[0] = interCheckVictoireRec(g,i - 1,j,depth - 1,side );
-    d[1] = interCheckVictoireRec(g,i + 1,j,depth - 1,side );
-    d[2] = interCheckVictoireRec(g,i,j - 1,depth - 1,side );
-    d[3] = interCheckVictoireRec(g,i,j + 1,depth - 1,side );
-    d[4] = interCheckVictoireRec(g,i - 1,j - 1,depth - 1,side );
-    d[5] = interCheckVictoireRec(g,i + 1,j + 1,depth - 1,side );
-    d[6] = interCheckVictoireRec(g,i + 1,j - 1,depth - 1,side );
-    d[7] = interCheckVictoireRec(g,i - 1,j + 1,depth - 1,side );
+    uint8_t d;
+    d = interCheckVictoireRec(g,i + dir1,j + dir2,depth - 1,side );
+  
     //int d[8] = interCheckVictoireRec(g,i,j,depth - 1,side );
-    uint8_t last = 0;
-    for(uint8_t i = 0; i < 8; i++){
-        if(d[i] > last){
-            last = d[i];
-        }
-    }
-    printf("\n%d\n", last);
     return last+1;
 }
 /*

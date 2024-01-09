@@ -79,6 +79,50 @@ char jouerCoup(grille *g)
     return action;
 }
 
+uint8_t checkVictoireRec(grille* g, char side){
+    for(int i = 0; i < 6; i++){
+        for(int j = 0; j < 7; i++){
+            if(interCheckVictoireRec(g,i,j,4,side) > 3){
+                printf("jouerur %c a gagner\n",side);
+                return side;
+            }
+
+        }
+    }
+    return 0;
+}
+
+uint8_t interCheckVictoireRec(grille* g,int i, int j, int depth,char side){
+    if(i < 0 || 
+        j < 0 ||
+        i >= 6 ||
+        j >= 7){
+            return 0;
+        }
+        if(g->tab[i][j] != side){
+            return 0;
+        }
+        if(depth == 0){
+            return 0;
+        }
+    int d[8];
+    int d[0] = interCheckVictoireRec(g,i - 1,j,depth - 1,side );
+    int d[1] = interCheckVictoireRec(g,i + 1,j,depth - 1,side );
+    int d[2] = interCheckVictoireRec(g,i,j - 1,depth - 1,side );
+    int d[3] = interCheckVictoireRec(g,i,j + 1,depth - 1,side );
+    int d[4] = interCheckVictoireRec(g,i - 1,j - 1,depth - 1,side );
+    int d[5] = interCheckVictoireRec(g,i + 1,j + 1,depth - 1,side );
+    int d[6] = interCheckVictoireRec(g,i + 1,j - 1,depth - 1,side );
+    int d[7] = interCheckVictoireRec(g,i - 1,j + 1,depth - 1,side );
+    //int d[8] = interCheckVictoireRec(g,i,j,depth - 1,side );
+    uint8_t last = 0;
+    for(int i; i < 8; i++){
+        if(d[i] > last){
+            last = d[i];
+        }
+    }
+    return last;
+}
 
 char checkVictoire(grille* g, char pos){
     uint16_t x;

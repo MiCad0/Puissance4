@@ -128,7 +128,7 @@ uint8_t interCheckVictoireRec(grille* g,uint8_t i, uint8_t j, uint8_t depth,char
     d = interCheckVictoireRec(g,i + dir1,j + dir2,depth - 1,side );
   
     //int d[8] = interCheckVictoireRec(g,i,j,depth - 1,side );
-    return last+1;
+    return d+1;
 }
 /*
 char checkVictoire(grille* g, char pos){

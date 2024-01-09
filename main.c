@@ -15,7 +15,7 @@ void printGrille(grille *g);
 char poserJeton(grille *g, char pos);
 void freeGrille(grille *g);
 uint8_t checkVictoireRec(grille* g, char side);
-uint8_t interCheckVictoireRec(grille* g,uint8_t i, uint8_t j, uint8_t depth,char side);
+uint8_t interCheckVictoireRec(grille* g,uint8_t i, uint8_t j, uint8_t depth,char side, int, int);
 char jouerCoup(grille *g);
 
 
@@ -86,23 +86,19 @@ uint8_t checkVictoireRec(grille* g, char side){
     for(uint8_t i = 0; i < 6; i++){
         for(uint8_t j = 0; j < 7; j++){
             if(interCheckVictoireRec(g,i,j,4,side,1,1)
-            + interCheckVictoireRec(g,i,j,4,side,-1,-1) > 3){
-                printf("jouerur %c a gagner\n",side);
+            + interCheckVictoireRec(g,i,j,4,side,-1,-1) > 4){
                 return side;
             }  
             if(interCheckVictoireRec(g,i,j,4,side,0,1)
-            + interCheckVictoireRec(g,i,j,4,side,0,-1) > 3){
-                printf("jouerur %c a gagner\n",side);
+            + interCheckVictoireRec(g,i,j,4,side,0,-1) > 4){
                 return side;
             }  
             if(interCheckVictoireRec(g,i,j,4,side,1,0)
-            + interCheckVictoireRec(g,i,j,4,side,-1,0) > 3){
-                printf("jouerur %c a gagner\n",side);
+            + interCheckVictoireRec(g,i,j,4,side,-1,0) > 4){
                 return side;
             }
             if(interCheckVictoireRec(g,i,j,4,side,1,-1)
-            + interCheckVictoireRec(g,i,j,4,side,-1,1) > 3){
-                printf("jouerur %c a gagner\n",side);
+            + interCheckVictoireRec(g,i,j,4,side,-1,1) > 4){
                 return side;
             }
 
@@ -125,191 +121,11 @@ uint8_t interCheckVictoireRec(grille* g,uint8_t i, uint8_t j, uint8_t depth,char
             return 0;
         }
     uint8_t d;
-    d = interCheckVictoireRec(g,i + dir1,j + dir2,depth - 1,side );
+    d = interCheckVictoireRec(g,i + dir1,j + dir2,depth - 1,side, dir1, dir2);
   
     //int d[8] = interCheckVictoireRec(g,i,j,depth - 1,side );
     return d+1;
 }
-/*
-char checkVictoire(grille* g, char pos){
-    uint16_t x;
-    uint16_t y = pos - 'A';
-    uint16_t i = 0;
-    uint16_t score = 1;
-    uint16_t check = 1;
-
-    while (g->tab[i][y] == ' ')
-    {
-        ++i;
-    }
-    x = i;
-    char pion = g->tab[x][y];
-    
-    while (check)          //Check de victoire en dessous
-    {
-        if (i<5)
-        {
-            if (g->tab[i+1][y] == pion)
-            {
-                if(score < 4){
-                    ++score;
-                }
-                else check = 0;
-                ++i;
-            }
-            else check = 0;
-        }
-        else check = 0;
-        
-    }
-    if (score == 4)
-    {
-        return 'V';
-    }
-    else i = y;
-
-    check = 1;
-    score = 1;
-    while (check)          //Check victoire sur le coté
-    {
-        if (i>0)
-        {
-            if (g->tab[x][i-1] == pion)
-            {
-                if(score < 4){
-                    ++score;
-                }
-                else check = 0;
-                --i;
-            }
-            else check = 0;
-        }
-        else check = 0;
-    }
-    if (score == 4)
-    {
-        return 'V';
-    }
-    else i = x;
-
-    while (check)          //Suite de check victoire sur le coté
-    {
-        if (i>0)
-        {
-            if (g->tab[x][i+1] == pion)
-            {
-                if(score < 4){
-                    ++score;
-                }
-                else check = 0;
-                --i;
-            }
-            else check = 0;
-        }
-        else check = 0;
-    }
-    if (score == 4)
-    {
-        return 'V';
-    }
-    else i = 1;
-    score = 1;
-    check = 1;
-
-    
-    while (check)          //Check en diagonale
-    {
-        if ((x+i<=6)||(y+i<=5))
-        {
-            if (g->tab[x+i][y+i] == pion)
-            {
-                if(score < 4){
-                    ++score;
-                }
-                else check = 0;
-                --i;
-            }
-            else check = 0;
-        }
-        else check = 0;
-    }
-    if (score == 4)
-    {
-        return 'V';
-    }
-    else i = 1;
-    check = 1;
-    while (check)          //Suite de check en diagonale
-    {
-        if ((x+i>=0)&&(y+i>=0))
-        {
-            if (g->tab[x-i][y-i] == pion)
-            {
-                if(score < 4){
-                    ++score;
-                }
-                else check = 0;
-                --i;
-            }
-            else check = 0;
-        }
-        else check = 0;
-    }
-    if (score == 4)
-    {
-        return 'V';
-    }
-    else i = 1;
-    score = 1;
-    check = 1;
-    while (check)          //Check dans l'autre diagonale
-    {
-        if ((x+i<=6)&&(y+i>=0))
-        {
-            if (g->tab[x+i][y-i] == pion)
-            {
-                if(score < 4){
-                    ++score;
-                }
-                else check = 0;
-                --i;
-            }
-            else check = 0;
-        }
-        else check = 0;
-    }
-    if (score == 4)
-    {
-        return 'V';
-    }
-    else i = 1;
-    check = 1;
-
-    while (check)          //Suite de check dans l'autre diagonale
-    {
-        if ((x+i>=0)&&(y+i<=5))
-        {
-            if (g->tab[x-i][y+i] == pion)
-            {
-                if(score < 4){
-                    ++score;
-                }
-                else check = 0;
-                --i;
-            }
-            else check = 0;
-        }
-        else check = 0;
-    }
-    if (score == 4)
-    {
-        return 'V';
-    }
-    else return 'N';    
-}
-*/
-
-
 
 void freeGrille(grille *g)
 {

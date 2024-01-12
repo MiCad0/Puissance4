@@ -3,17 +3,21 @@
 #include <stdio.h>
 #include <assert.h>
 
+#define NB_LIGNES 6
+#define NB_COL 7
+
+
 
 typedef struct grille
 {
-    char *tab[6];
+    char *tab[NB_LIGNES];
     uint16_t currP;
     uint8_t gameStatus;
 } grille;
 
 grille *creerGrille();
 void printGrille(grille *g);
-void poserJeton(grille *g, char pos);
+char poserJeton(grille *g, char pos);
 void freeGrille(grille *g);
 uint8_t checkVictoireRec(grille* g, char side,int,int);
 uint8_t interCheckVictoireRec(grille* g,uint8_t i, uint8_t j, uint8_t depth,char side, int, int);
@@ -23,10 +27,10 @@ char jouerCoup(grille *g);
 grille *creerGrille()
 {
     grille *g = malloc(sizeof(grille));
-    for (uint8_t i = 0; i < 6; ++i)
+    for (uint8_t i = 0; i < NB_LIGNES; ++i)
     {
         g->tab[i] = malloc(sizeof(char));
-        for (uint16_t j = 0; j < 7; ++j)
+        for (uint16_t j = 0; j < NB_COL; ++j)
         {
             g->tab[i][j] = ' ';
         }
@@ -39,9 +43,9 @@ grille *creerGrille()
 void printGrille(grille *g)
 {
     printf("  A  B  C  D  E  F  G  \n");
-    for (uint8_t i = 0; i < 6; ++i)
+    for (uint8_t i = 0; i < NB_LIGNES; ++i)
     {
-        for (uint8_t j = 0; j < 7; ++j)
+        for (uint8_t j = 0; j < NB_COL; ++j)
         {
             printf("||%c", g->tab[i][j]);
         }
@@ -59,6 +63,7 @@ char poserJeton(grille *g, char pos)
         --i;
     }
     g->tab[i][pos - 'A'] = pion[g->currP];
+    return pion[g->currP];
 }
 
 char jouerCoup(grille *g)
@@ -78,7 +83,7 @@ char jouerCoup(grille *g)
         goto chercherCoup;
     }
     
-    poserJeton(g, action);
+    action = poserJeton(g, action);
     return action;
 }
 
@@ -109,8 +114,8 @@ uint8_t checkVictoireRec(grille* g, char side,int i ,int j){
 uint8_t interCheckVictoireRec(grille* g,uint8_t i, uint8_t j, uint8_t depth,char side,int dir1,int dir2){
     if(i < 0 || 
         j < 0 ||
-        i >= 6 ||
-        j >= 7){
+        i >= NB_LIGNES ||
+        j >= NB_COL){
             return 0;
         }
         if(g->tab[i][j] != side){
@@ -128,7 +133,7 @@ uint8_t interCheckVictoireRec(grille* g,uint8_t i, uint8_t j, uint8_t depth,char
 
 void freeGrille(grille *g)
 {
-    for (uint8_t i = 0; i < 6; ++i)
+    for (uint8_t i = 0; i < NB_LIGNES; ++i)
     {
         free(g->tab[i]);
     }

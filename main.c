@@ -159,7 +159,7 @@ int main()
         {
             ++coord;
         }
-        if(checkVictoireRec(g,pion[g->currP] ,coord,action - 'A') != 0){//FIXME!!! Blyat
+        if(checkVictoireRec(g,pion[g->currP] ,coord,action - 'A') != 0){
             g->gameStatus = 1;
             printf("Bravo, le joueur %d a gagné\n Voulez-vous rejouer? [y/n] \n", g->currP + 1);
             scanf(" %c", &action);

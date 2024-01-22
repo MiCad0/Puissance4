@@ -15,6 +15,12 @@ typedef struct grille
     uint8_t gameStatus;
 } grille;
 
+typedef struct node{
+    int eval;
+    grille position;
+    node child[NB_COL];
+}node_t
+
 grille *creerGrille();
 void printGrille(grille *g);
 void poserJeton(grille *g, char pos);
@@ -22,6 +28,70 @@ void freeGrille(grille *g);
 uint8_t checkVictoireRec(grille* g, char side,int,int);
 uint8_t interCheckVictoireRec(grille* g,uint8_t i, uint8_t j, uint8_t depth,char side, int, int);
 char jouerCoup(grille *g);
+node_t * creerNode(grille *g);
+grille *copierGrille(grille * g);
+grille * premutationGrille(char coup);
+void generateChilds(node_t n[NB_COL]);
+void freeNode(node_t * n);
+
+node_t * creerNode(grille *g){
+    node_t * n = malloc(sizeof(node_t));
+    for(int i = 0;i < NB_COL;i++ ){
+        n->child = NULL;
+    }
+    n->position = g;
+    n->eval = 0;
+    return n;
+}
+
+void generateChilds(node_t * n){
+    if(n->position == NULL)
+        return;
+    for(int i = 0; i < NB_COL; i++){
+        n->child[i] = creerNode(copierGrille(n->position));
+        if(!premutationGrille(n->child[i].position), 'A' - i){
+            freeNode(n->child[i]);
+            n->child[i] = NULL;
+            continue;
+        }
+    }
+}
+
+
+
+
+
+
+grille *copierGrille(grille * g){
+    grille *gc = creerGrille();
+     for (uint8_t i = 0; i < NB_LIGNES; ++i)
+    {
+        for (uint16_t j = 0; j < NB_COL; ++j)
+        {
+            gc->tab[i][j] = g->tab[i][j];
+        }
+    }
+    gc->currP = g->currP ;
+    gc->gameStatus = g->gameStatus;
+    return gc;
+
+}
+
+int premutationGrille(grille * g,char coup){
+    if (g->tab[0][coup-'A'] != ' ')
+    {
+       return 0;
+    }
+    poserJeton(g,coup);
+    //changer le p.currp jesais pas comment sa marche
+    g->currP = !g->currP + 1;
+    return 1;
+}
+
+
+
+
+
 
 
 grille *creerGrille()

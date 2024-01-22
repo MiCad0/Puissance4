@@ -18,7 +18,7 @@ typedef struct grille
 typedef struct node{
     int eval;
     grille position;
-    node child[NB_COL];
+    struct node child[NB_COL];
 }node_t
 
 grille *creerGrille();

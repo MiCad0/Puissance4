@@ -33,6 +33,7 @@ grille *copierGrille(grille * g);
 uint8_t permutationGrille(grille * g, char coup);
 void generateChilds(node_t n[NB_COL]);
 void freeNode(node_t * n);
+void freeAllNodes(node_t * n);
 
 node_t * creerNode(grille *g){
     node_t * n = malloc(sizeof(node_t));
@@ -57,7 +58,20 @@ void generateChilds(node_t * n){
     }
 }
 
+void freeNode(node_t * n){
+    free(n->position);
+    free(n->child);
+    free(n);
+}
 
+
+void freeAllNodes(node_t * n){
+    for(uint16_t i = 0; i<NB_COL; ++i){
+        if(n->child[i] != NULL)
+            freeAllNodes(n);
+    }
+    freeNode(n);
+}
 
 
 

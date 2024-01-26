@@ -17,11 +17,11 @@ typedef struct grille
 
 typedef struct node{
     int eval;
-    grille position;
-    struct node child[NB_COL];
-}node_t
+    grille * position;
+    struct node * child[NB_COL];
+}node_t;
 
-grille *creerGrille();
+grille* creerGrille();
 void printGrille(grille *g);
 void poserJeton(grille *g, char pos);
 void freeGrille(grille *g);
@@ -30,14 +30,14 @@ uint8_t interCheckVictoireRec(grille* g,uint8_t i, uint8_t j, uint8_t depth,char
 char jouerCoup(grille *g);
 node_t * creerNode(grille *g);
 grille *copierGrille(grille * g);
-grille * premutationGrille(char coup);
+uint8_t permutationGrille(grille * g, char coup);
 void generateChilds(node_t n[NB_COL]);
 void freeNode(node_t * n);
 
 node_t * creerNode(grille *g){
     node_t * n = malloc(sizeof(node_t));
     for(int i = 0;i < NB_COL;i++ ){
-        n->child = NULL;
+        n->child[i] = NULL;
     }
     n->position = g;
     n->eval = 0;
@@ -49,7 +49,7 @@ void generateChilds(node_t * n){
         return;
     for(int i = 0; i < NB_COL; i++){
         n->child[i] = creerNode(copierGrille(n->position));
-        if(!premutationGrille(n->child[i].position), 'A' - i){
+        if(!permutationGrille(n->child[i]->position, 'A' - i)){
             freeNode(n->child[i]);
             n->child[i] = NULL;
             continue;
@@ -77,7 +77,7 @@ grille *copierGrille(grille * g){
 
 }
 
-int premutationGrille(grille * g,char coup){
+uint8_t permutationGrille(grille * g,char coup){
     if (g->tab[0][coup-'A'] != ' ')
     {
        return 0;

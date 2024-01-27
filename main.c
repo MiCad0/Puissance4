@@ -16,7 +16,8 @@ typedef struct grille
 } grille;
 
 typedef struct node{
-    int eval;
+    int32_t eval;
+    int32_t Reval;
     grille * position;
     struct node * child[NB_COL];
 }node_t;
@@ -34,6 +35,9 @@ uint8_t permutationGrille(grille * g, char coup);
 void generateChilds(node_t n[NB_COL]);
 void freeNode(node_t * n);
 void freeAllNodes(node_t * n);
+void construireArbre(int depth,node_t * node);
+void getBestPositon(node_t * root);
+uint8_t getBestMove(node_t * root,uint8_t side);
 
 node_t * creerNode(grille *g){
     node_t * n = malloc(sizeof(node_t));
@@ -42,6 +46,7 @@ node_t * creerNode(grille *g){
     }
     n->position = g;
     n->eval = 0;
+    n->Reval = 0;
     return n;
 }
 
@@ -73,6 +78,71 @@ void freeAllNodes(node_t * n){
     freeNode(n);
 }
 
+void construireArbre(int depth,node_t * node){
+    if(depth = 0){
+        return;
+    }
+    
+    generateChilds(node);
+    for(int i = 0; i <NB_COL; i++){
+        construireArbre(depth - 1, node->child[i]);
+    }
+}
+
+void getBestPositon(node_t * root){
+    // retourne l'indice du meilleur coup
+    for(int i = 0; i < NB_COL ; i++){
+        if(root->child[i] != NULL){
+            getBestPositon(root->child[i]);
+        }
+
+    }
+    char side[2] = {'X','O'};
+    //par du principe que X est l'IA et O l'adversaire
+    root->eval = scorePosition(root->position,'X','O');  
+
+}
+
+uint8_t getBestMove(node_t * root,uint8_t side){
+    uint8_t index = 0;
+    uint16_t bestEval = 0;
+    if(root == NULL){
+        return 0;
+    }
+    for(int i = 0; i < NB_COL ; i++){
+        if(root->child[i] != NULL){
+           index = getBestMove(root->child[i],side);
+        }
+
+    }
+    index = 0;
+    for(int i = 0; i < NB_COL ; i++){
+        if(root->child[i] == NULL){
+           continue;
+        }
+        if(side != root->position.currP){
+            if(root->child[i]->Reval > bestEval){
+                bestEval = root->child[i]->Reval;
+                index = i;
+            }
+        }
+        if(side == root->position.currP){
+            if(bestEval == 0){
+                bestEval = root->child[i]->Reval;
+            }
+            if(root->child[i]->Reval < bestEval){
+                bestEval = root->child[i]->Reval;
+                index = i;
+            }
+        }
+
+    }
+
+    root->Reval = root->eval + bestEval;
+    return index;
+
+}
+
 
 
 
@@ -98,7 +168,7 @@ uint8_t permutationGrille(grille * g,char coup){
     }
     poserJeton(g,coup);
     //changer le p.currp jesais pas comment sa marche
-    g->currP = !g->currP + 1;
+    g->currP = !g->currP;
     return 1;
 }
 

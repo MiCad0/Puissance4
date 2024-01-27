@@ -195,6 +195,78 @@ uint8_t checkVictoireRec(grille* g, char side,int i ,int j){
     return 0;
 }
 
+int16_t scorePosition(grille * g,uint8_t side1,char side2){
+    int16_t score = 0;
+    for(uint8_t i = 0; i <NB_LIGNES; i++){
+        for(uint8_t j = 0; j <NB_COL; j++){
+            
+            score += returnScoreOfJeton(jetonCount(g,i,j,2,side1,1,1),1) + returnScoreOfJeton(jetonCount(g,i,j,2,side2,1,1,0)) ;
+            score += returnScoreOfJeton(jetonCount(g,i,j,2,side1,1,0),1) + returnScoreOfJeton(jetonCount(g,i,j,2,side2,1,0)) ;
+            score += returnScoreOfJeton(jetonCount(g,i,j,2,side1,0,1),1) + returnScoreOfJeton(jetonCount(g,i,j,2,side2,0,1)) ;
+            score += returnScoreOfJeton(jetonCount(g,i,j,2,side1,1,-1),1) + returnScoreOfJeton(jetonCount(g,i,j,2,side2,1,-1)) ;
+        }
+    }
+    return score;
+}
+
+int16_t returnScoreOfJeton(int16_t sc,uint8_t side){
+    if(sc == 4 && side ){
+        return 100;
+    }
+
+    if(sc == 4 && !side ){
+        return -95;
+    }
+
+    if(sc == 3 && side ){
+        return 5;
+    }
+
+     if(sc == 3 && !side ){
+        return -4;
+    }
+    if(sc == 2 && side ){
+        return 2;
+    }
+    if(sc == 2 && !side ){
+        return -1;
+    }
+    return 0;
+}
+
+uint8_t jetonCount(grille* g,uint8_t i, uint8_t j, uint8_t depth,char side,int dir1,int dir2){
+     if(i < 0 || 
+        j < 0 ||
+        i >= NB_LIGNES ||
+        j >= NB_COL){
+        return 0;
+    }
+    if(depth == 0){
+        return 0;
+    }
+    if(g->tab[i][j] == ' '){
+       
+        return jetonCount(g,i + dir1,j + dir2,depth - 1,side, dir1, dir2) + jetonCount(g,i + dir1,j + dir2,depth - 1,side, -dir1, -dir2);
+   }
+    if(g->tab[i][j] != side){
+       
+        return -1;
+   }
+
+   
+    int8_t d  = jetonCount(g,i + dir1,j + dir2,depth - 1,side, dir1, dir2);
+    if(d < 0){
+        return d;
+    }
+    int8_t d1 = jetonCount(g,i + dir1,j + dir2,depth - 1,side, -dir1, -dir2);
+    if(d < 0){
+        return d1;
+    }
+    
+  
+    return d + d1 + 1;
+}
+
 uint8_t interCheckVictoireRec(grille* g,uint8_t i, uint8_t j, uint8_t depth,char side,int dir1,int dir2){
     if(i < 0 || 
         j < 0 ||

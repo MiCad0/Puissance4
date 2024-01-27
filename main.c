@@ -60,6 +60,48 @@ node_t * creerNode(grille *g){
     return n;
 }
 
+void construireArbre(int depth,node_t * node){
+    if(depth = 0){
+        return;
+    }
+    
+    generateChilds(node);
+    for(int i = 0; i <NB_COL; i++){
+        construireArbre(depth - 1, node->child[i]);
+    }
+}
+
+uint16_t getBestPositon(node_t * root){
+    // retourne l'indice du meilleur coup
+    for(int i = 0; i < NB_COL ; i++){
+        if(root->child[i] != NULL){
+            getBestPositon(root->child[i]);
+        }
+
+    }
+    root->eval = evaluatePosition(root);  
+
+}
+
+uint16_t evaluatePosition(node_t * node){
+    grille * g = node->position;
+    uint16_t eval = 0;
+    char side = node->position->gameStatus;
+    for(int i = 0 ; i < NB_COL; i++){
+        for(int j = 0; j < NB_LIGNES; j++){
+            eval = interCheckVictoireRec(g,i,j,4,side,1,1) +
+            + interCheckVictoireRec(g,i,j,4,side,-1,-1) 
+            + interCheckVictoireRec(g,i,j,4,side,0,1)
+            + interCheckVictoireRec(g,i,j,4,side,0,-1)
+            + interCheckVictoireRec(g,i,j,4,side,1,0)
+            + interCheckVictoireRec(g,i,j,4,side,-1,0)
+            + interCheckVictoireRec(g,i,j,4,side,1,-1)
+            + interCheckVictoireRec(g,i,j,4,side,-1,1);
+        }
+    }
+    return eval;
+}
+
 void generateChilds(node_t * n){
     if(n == NULL)
         return;

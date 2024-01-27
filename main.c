@@ -28,16 +28,23 @@ void poserJeton(grille *g, char pos);
 void freeGrille(grille *g);
 uint8_t checkVictoireRec(grille* g, char side,int,int);
 uint8_t interCheckVictoireRec(grille* g,uint8_t i, uint8_t j, uint8_t depth,char side, int, int);
+
 char jouerCoup(grille *g);
 node_t * creerNode(grille *g);
 grille *copierGrille(grille * g);
 uint8_t permutationGrille(grille * g, char coup);
 void generateChilds(node_t n[NB_COL]);
+
 void freeNode(node_t * n);
 void freeAllNodes(node_t * n);
 void construireArbre(int depth,node_t * node);
 void getBestPositon(node_t * root);
 uint8_t getBestMove(node_t * root,uint8_t side);
+
+int16_t scorePosition(grille * g,uint8_t side1,char side2);
+int16_t returnScoreOfJeton(int16_t sc,uint8_t side);
+
+uint8_t jetonCount(grille* g,uint8_t i, uint8_t j, uint8_t depth,char side,int dir1,int dir2);
 
 node_t * creerNode(grille *g){
     node_t * n = malloc(sizeof(node_t));
@@ -65,7 +72,6 @@ void generateChilds(node_t * n){
 
 void freeNode(node_t * n){
     free(n->position);
-    free(n->child);
     free(n);
 }
 
@@ -120,13 +126,13 @@ uint8_t getBestMove(node_t * root,uint8_t side){
         if(root->child[i] == NULL){
            continue;
         }
-        if(side != root->position.currP){
+        if(side != root->position->currP){
             if(root->child[i]->Reval > bestEval){
                 bestEval = root->child[i]->Reval;
                 index = i;
             }
         }
-        if(side == root->position.currP){
+        if(side == root->position->currP){
             if(bestEval == 0){
                 bestEval = root->child[i]->Reval;
             }
@@ -270,10 +276,10 @@ int16_t scorePosition(grille * g,uint8_t side1,char side2){
     for(uint8_t i = 0; i <NB_LIGNES; i++){
         for(uint8_t j = 0; j <NB_COL; j++){
             
-            score += returnScoreOfJeton(jetonCount(g,i,j,2,side1,1,1),1) + returnScoreOfJeton(jetonCount(g,i,j,2,side2,1,1,0)) ;
-            score += returnScoreOfJeton(jetonCount(g,i,j,2,side1,1,0),1) + returnScoreOfJeton(jetonCount(g,i,j,2,side2,1,0)) ;
-            score += returnScoreOfJeton(jetonCount(g,i,j,2,side1,0,1),1) + returnScoreOfJeton(jetonCount(g,i,j,2,side2,0,1)) ;
-            score += returnScoreOfJeton(jetonCount(g,i,j,2,side1,1,-1),1) + returnScoreOfJeton(jetonCount(g,i,j,2,side2,1,-1)) ;
+            score += returnScoreOfJeton(jetonCount(g,i,j,2,side1,1,1),1) + returnScoreOfJeton(jetonCount(g,i,j,2,side2,1,1),0) ;
+            score += returnScoreOfJeton(jetonCount(g,i,j,2,side1,1,0),1) + returnScoreOfJeton(jetonCount(g,i,j,2,side2,1,0),0) ;
+            score += returnScoreOfJeton(jetonCount(g,i,j,2,side1,0,1),1) + returnScoreOfJeton(jetonCount(g,i,j,2,side2,0,1),0) ;
+            score += returnScoreOfJeton(jetonCount(g,i,j,2,side1,1,-1),1) + returnScoreOfJeton(jetonCount(g,i,j,2,side2,1,-1),0) ;
         }
     }
     return score;

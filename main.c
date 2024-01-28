@@ -129,7 +129,6 @@ void getBestPositon(node_t * root,uint8_t iside){
 
     }
     char side[2] = {'O','X'};
-    
     root->eval = scorePosition(root->position,side[iside],side[!iside]);  
 
 }
@@ -309,15 +308,15 @@ int16_t scorePosition(grille * g,uint8_t side1,char side2){
     for(uint8_t i = 0; i <NB_LIGNES; i++){
         for(uint8_t j = 0; j <NB_COL; j++){
             
-            score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,1,1),1)  + returnScoreOfJeton(jetonCount(g,i,j,4,side2,1,1),0) ;
-            score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,1,0),1) + returnScoreOfJeton(jetonCount(g,i,j,4,side2,1,0),0) ;
-            score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,0,1),1) + returnScoreOfJeton(jetonCount(g,i,j,4,side2,0,1),0) ;
-            score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,1,-1),1) + returnScoreOfJeton(jetonCount(g,i,j,4,side2,1,-1),0) ;
+            score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,1,1),1)/2  + returnScoreOfJeton(jetonCount(g,i,j,4,side2,1,1),0)/2 ;
+            score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,1,0),1)/2 + returnScoreOfJeton(jetonCount(g,i,j,4,side2,1,0),0)/2 ;
+            score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,0,1),1)/2 + returnScoreOfJeton(jetonCount(g,i,j,4,side2,0,1),0)/2 ;
+            score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,1,-1),1)/2 + returnScoreOfJeton(jetonCount(g,i,j,4,side2,1,-1),0)/2 ;
 
-             score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,-1,-1),1)  + returnScoreOfJeton(jetonCount(g,i,j,4,side2,-1,-1),0) ;
-            score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,-1,0),1) + returnScoreOfJeton(jetonCount(g,i,j,4,side2,-1,0),0) ;
-            score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,0,-1),1) + returnScoreOfJeton(jetonCount(g,i,j,4,side2,0,-1),0) ;
-            score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,-1,1),1) + returnScoreOfJeton(jetonCount(g,i,j,4,side2,-1,1),0) ;
+             score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,-1,-1),1)/2  + returnScoreOfJeton(jetonCount(g,i,j,4,side2,-1,-1),0)/2 ;
+            score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,-1,0),1)/2 + returnScoreOfJeton(jetonCount(g,i,j,4,side2,-1,0),0)/2 ;
+            score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,0,-1),1)/2 + returnScoreOfJeton(jetonCount(g,i,j,4,side2,0,-1),0)/2 ;
+            score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,-1,1),1)/2 + returnScoreOfJeton(jetonCount(g,i,j,4,side2,-1,1),0)/2;
         }
     }
     return score;
@@ -442,19 +441,23 @@ int main()
             }
         }
       
-        //if(g->currP == 0){
+        if(g->currP == 1){
             for(int i = 0; i< NB_COL; i++){
                 if(root->child[i] == NULL)continue;
                 printf("move %c has score of %d and Reval of %d\n", 'A' + i, root->child[i]->eval,root->child[i]->Reval);
             }
             printf("the best move is %c with Reval of %d\n",'A' + pos,root->child[pos]->Reval);
-        //}
+            action = 'A' + pos;
+            poserJeton(g, action);
+        }
+        else{
+            action = jouerCoup(g);
+        }
       
         //printGrille(root->child[pos]->position);
         freeAllNodes(root);
-        action = 'A' + pos;
-        poserJeton(g, action);
-        //action = jouerCoup(g);
+       
+        
         printGrille(g);
         uint8_t coord = 0;
         char pion[2] = {'X', 'O'};

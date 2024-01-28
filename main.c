@@ -79,7 +79,7 @@ void freeNode(node_t * n){
 
 
 void freeAllNodes(node_t * n){
-    for(uint16_t i = 0; i<NB_COL; ++i){
+    for(uint8_t i = 0; i<NB_COL; ++i){
         if(n->child[i] != NULL){
             freeAllNodes(n->child[i]);
         }
@@ -430,26 +430,35 @@ int main()
         printf("notre tour = %d \n",!g->currP);
         //printABR(root,0);
         uint8_t pos = 0;
-        for(int i = 1; i<NB_COL;i++){
+        for(int i = 0; i<NB_COL;i++){
+            if(root->child[i] == NULL){
+                if(pos == i){
+                    pos++;
+                }
+                continue;
+            }
             if(root->child[i]->Reval > root->child[pos]->Reval ){
                 pos = i;
             }
         }
       
-        if(g->currP == 0){
+        //if(g->currP == 0){
             for(int i = 0; i< NB_COL; i++){
+                if(root->child[i] == NULL)continue;
                 printf("move %c has score of %d and Reval of %d\n", 'A' + i, root->child[i]->eval,root->child[i]->Reval);
             }
             printf("the best move is %c with Reval of %d\n",'A' + pos,root->child[pos]->Reval);
-        }
+        //}
       
         //printGrille(root->child[pos]->position);
         freeAllNodes(root);
-        action = jouerCoup(g);
+        action = 'A' + pos;
+        poserJeton(g, action);
+        //action = jouerCoup(g);
         printGrille(g);
         uint8_t coord = 0;
         char pion[2] = {'X', 'O'};
-
+        printf("action = %c\n",action);
         while (g->tab[coord][action - 'A'] == ' ')
         {
             ++coord;

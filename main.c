@@ -10,7 +10,7 @@
 
 typedef struct grille
 {
-    char *tab[NB_LIGNES];
+    char **tab;
     uint16_t currP;
     uint8_t gameStatus;
 } grille;
@@ -51,18 +51,18 @@ node_t * creerNode(grille *g){
     for(int i = 0;i < NB_COL;i++ ){
         n->child[i] = NULL;
     }
-    n->position = g;
+    n->position = copierGrille(g);
     n->eval = 0;
     n->Reval = 0;
     return n;
 }
 
 void generateChilds(node_t * n){
-    if(n->position == NULL)
+    if(n == NULL)
         return;
     for(int i = 0; i < NB_COL; i++){
         n->child[i] = creerNode(copierGrille(n->position));
-        if(!permutationGrille(n->child[i]->position, 'A' - i)){
+        if(!permutationGrille(n->child[i]->position, 'A' + i)){
             freeNode(n->child[i]);
             n->child[i] = NULL;
             continue;
@@ -71,26 +71,29 @@ void generateChilds(node_t * n){
 }
 
 void freeNode(node_t * n){
-    free(n->position);
+    freeGrille(n->position);
     free(n);
 }
 
 
 void freeAllNodes(node_t * n){
     for(uint16_t i = 0; i<NB_COL; ++i){
-        if(n->child[i] != NULL)
-            freeAllNodes(n);
+        if(n->child[i] != NULL){
+            freeAllNodes(n->child[i]);
+        }
+           
     }
     freeNode(n);
 }
 
 void construireArbre(int depth,node_t * node){
-    if(depth = 0){
+    if(depth == 0){
         return;
     }
     
     generateChilds(node);
     for(int i = 0; i <NB_COL; i++){
+        if(node->child[i] == NULL) continue;
         construireArbre(depth - 1, node->child[i]);
     }
 }
@@ -105,13 +108,13 @@ void getBestPositon(node_t * root){
     }
     char side[2] = {'X','O'};
     //par du principe que X est l'IA et O l'adversaire
-    root->eval = scorePosition(root->position,'X','O');  
+    root->eval = scorePosition(root->position,side[root->position->currP],side[!root->position->currP]);  
 
 }
 
 uint8_t getBestMove(node_t * root,uint8_t side){
     uint8_t index = 0;
-    uint16_t bestEval = 0;
+    int16_t bestEval = 0;
     if(root == NULL){
         return 0;
     }
@@ -187,9 +190,11 @@ uint8_t permutationGrille(grille * g,char coup){
 grille *creerGrille()
 {
     grille *g = malloc(sizeof(grille));
+    if(g == NULL) assert(0);
+    g->tab = (char**)malloc(sizeof(char*) * NB_LIGNES);
     for (uint8_t i = 0; i < NB_LIGNES; ++i)
     {
-        g->tab[i] = malloc(sizeof(char));
+        g->tab[i] = (char*)malloc(sizeof(char) * NB_COL);
         for (uint16_t j = 0; j < NB_COL; ++j)
         {
             g->tab[i][j] = ' ';
@@ -370,6 +375,7 @@ void freeGrille(grille *g)
     {
         free(g->tab[i]);
     }
+    free(g->tab);
     free(g);
 }
 
@@ -382,6 +388,12 @@ int main()
     g->currP = 1 - g->currP;
     while(g->gameStatus == 0){
         g->currP = 1 - g->currP;
+        node_t * root = creerNode(g);
+        construireArbre(3,root);
+        getBestPositon(root);
+        uint8_t pos = getBestMove(root,g->currP);
+        printf("the best move is %c with Reval of %d\n",'A' + pos,root->Reval);
+        freeAllNodes(root);
         action = jouerCoup(g);
         printGrille(g);
         uint8_t coord = 0;

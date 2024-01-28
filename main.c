@@ -46,6 +46,8 @@ int16_t returnScoreOfJeton(int16_t sc,uint8_t side);
 
 uint8_t jetonCount(grille* g,uint8_t i, uint8_t j, uint8_t depth,char side,int dir1,int dir2);
 
+void printABR(node_t * node,int8_t depth);
+
 node_t * creerNode(grille *g){
     node_t * n = malloc(sizeof(node_t));
     for(int i = 0;i < NB_COL;i++ ){
@@ -85,6 +87,15 @@ void freeAllNodes(node_t * n){
     }
     freeNode(n);
 }
+void printABR(node_t * node,int8_t depth){
+    for(int i = 0; i <NB_COL; i++){
+        if(node->child[i] == NULL) continue;
+        printABR(node->child[i],depth + 1);
+        printf("prof %d, enfant %d, cuurp = %d , eval = %d, Reval = %d \n",depth,i,node->child[i]->position->currP,node->child[i]->eval,node->child[i]->Reval);
+        printGrille(node->child[i]->position);
+        printf("\n");
+    }
+}
 
 void construireArbre(int depth,node_t * node){
     if(depth == 0){
@@ -92,8 +103,19 @@ void construireArbre(int depth,node_t * node){
     }
     
     generateChilds(node);
+    char side[2] = {'X','O'};
+   
     for(int i = 0; i <NB_COL; i++){
         if(node->child[i] == NULL) continue;
+        int coord = 0;
+        while (node->child[i]->position->tab[coord][i] == ' ')
+        {
+            ++coord;
+        }
+        if(checkVictoireRec(node->child[i]->position,side[node->child[i]->position->currP],i,coord)){
+            //printf("victoire trouver");
+            continue;
+        }
         construireArbre(depth - 1, node->child[i]);
     }
 }
@@ -106,7 +128,7 @@ void getBestPositon(node_t * root,uint8_t iside){
         }
 
     }
-    char side[2] = {'X','O'};
+    char side[2] = {'O','X'};
     
     root->eval = scorePosition(root->position,side[iside],side[!iside]);  
 
@@ -130,13 +152,13 @@ uint8_t getBestMove(node_t * root,uint8_t side){
         if(root->child[i] == NULL){
            continue;
         }
-        if(side == root->position->currP){
+        if(side == root->child[i]->position->currP){
             if(root->child[i]->Reval > bestEval){
                 bestEval = root->child[i]->Reval;
                 index = i;
             }
         }
-        if(side != root->position->currP){
+        if(side != root->child[i]->position->currP){
             if(bestEval == -5600){
                 bestEval = root->child[i]->Reval;
             }
@@ -148,10 +170,12 @@ uint8_t getBestMove(node_t * root,uint8_t side){
 
     }
      if(bestEval == -5600){
-        root->Reval = 0;
-        return index;
+        bestEval = 0;
      }
     root->Reval = root->eval + bestEval;
+
+    
+
     return index;
 
 }
@@ -181,7 +205,7 @@ uint8_t permutationGrille(grille * g,char coup){
     }
     poserJeton(g,coup);
     //changer le p.currp jesais pas comment sa marche
-    g->currP = !g->currP;
+    g->currP = 1 - g->currP;
     return 1;
 }
 
@@ -256,7 +280,7 @@ char jouerCoup(grille *g)
 }
 
 uint8_t checkVictoireRec(grille* g, char side,int i ,int j){
-        printf("pre: %c;%c,(%d,%d)\n", side, g->tab[i][j], i, j);
+        //printf("pre: %c;%c,(%d,%d)\n", side, g->tab[i][j], i, j);
     
             if(interCheckVictoireRec(g,i,j,4,side,1,1)
             + interCheckVictoireRec(g,i,j,4,side,-1,-1) > 4){
@@ -285,10 +309,15 @@ int16_t scorePosition(grille * g,uint8_t side1,char side2){
     for(uint8_t i = 0; i <NB_LIGNES; i++){
         for(uint8_t j = 0; j <NB_COL; j++){
             
-            score += returnScoreOfJeton(jetonCount(g,i,j,2,side1,1,1),1) + returnScoreOfJeton(jetonCount(g,i,j,2,side2,1,1),0) ;
-            score += returnScoreOfJeton(jetonCount(g,i,j,2,side1,1,0),1) + returnScoreOfJeton(jetonCount(g,i,j,2,side2,1,0),0) ;
-            score += returnScoreOfJeton(jetonCount(g,i,j,2,side1,0,1),1) + returnScoreOfJeton(jetonCount(g,i,j,2,side2,0,1),0) ;
-            score += returnScoreOfJeton(jetonCount(g,i,j,2,side1,1,-1),1) + returnScoreOfJeton(jetonCount(g,i,j,2,side2,1,-1),0) ;
+            score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,1,1),1)  + returnScoreOfJeton(jetonCount(g,i,j,4,side2,1,1),0) ;
+            score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,1,0),1) + returnScoreOfJeton(jetonCount(g,i,j,4,side2,1,0),0) ;
+            score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,0,1),1) + returnScoreOfJeton(jetonCount(g,i,j,4,side2,0,1),0) ;
+            score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,1,-1),1) + returnScoreOfJeton(jetonCount(g,i,j,4,side2,1,-1),0) ;
+
+             score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,-1,-1),1)  + returnScoreOfJeton(jetonCount(g,i,j,4,side2,-1,-1),0) ;
+            score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,-1,0),1) + returnScoreOfJeton(jetonCount(g,i,j,4,side2,-1,0),0) ;
+            score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,0,-1),1) + returnScoreOfJeton(jetonCount(g,i,j,4,side2,0,-1),0) ;
+            score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,-1,1),1) + returnScoreOfJeton(jetonCount(g,i,j,4,side2,-1,1),0) ;
         }
     }
     return score;
@@ -326,32 +355,32 @@ uint8_t jetonCount(grille* g,uint8_t i, uint8_t j, uint8_t depth,char side,int d
         j >= NB_COL){
         return 0;
     }
+    int8_t d = 0;
     if(depth == 0){
         return 0;
     }
-    if(g->tab[i][j] == ' '){
+   
        
-        return jetonCount(g,i + dir1,j + dir2,depth - 1,side, dir1, dir2) + jetonCount(g,i + dir1,j + dir2,depth - 1,side, -dir1, -dir2);
-   }
+    d = jetonCount(g,i + dir1,j + dir2,depth - 1,side, dir1, dir2);
+   
      
     if(g->tab[i][j] != side && g->tab[i][j] != ' '){
        
         return -1;
     }
-
-
-   
-    int8_t d  = jetonCount(g,i + dir1,j + dir2,depth - 1,side, dir1, dir2);
-    if(d < 0){
-        return d;
+    if(d == -1){
+        return -1;
     }
-    int8_t d1 = jetonCount(g,i + dir1,j + dir2,depth - 1,side, -dir1, -dir2);
-    if(d < 0){
-        return d1;
+    if(d >= 4){
+        return 4;
+    }
+    if(g->tab[i][j] == side){
+        return d + 1;
     }
     
+    return d;
   
-    return d + d1 + 1;
+    
 }
 
 uint8_t interCheckVictoireRec(grille* g,uint8_t i, uint8_t j, uint8_t depth,char side,int dir1,int dir2){
@@ -362,7 +391,7 @@ uint8_t interCheckVictoireRec(grille* g,uint8_t i, uint8_t j, uint8_t depth,char
         return 0;
         }
     if(g->tab[i][j] != side){
-        printf("2: %c;%c,(%d,%d)\n", side, g->tab[i][j], i, j);
+       
         return 0;
     }
     if(depth == 0){
@@ -370,7 +399,7 @@ uint8_t interCheckVictoireRec(grille* g,uint8_t i, uint8_t j, uint8_t depth,char
     }
     uint8_t d;
     d = interCheckVictoireRec(g,i + dir1,j + dir2,depth - 1,side, dir1, dir2);
-    printf("2: %c;%c,(%d,%d)? %d\n", side, g->tab[i][j], i, j, depth);
+    
     //int d[8] = interCheckVictoireRec(g,i,j,depth - 1,side );
     return d+1;
 }
@@ -395,13 +424,26 @@ int main()
     while(g->gameStatus == 0){
         g->currP = 1 - g->currP;
         node_t * root = creerNode(g);
-        construireArbre(3,root);
+        construireArbre(5,root);
         getBestPositon(root,!g->currP);
-        uint8_t pos = getBestMove(root,!g->currP);
-        for(int i = 0; i< NB_COL; i++){
-            printf("move %c has score of %d and Reval of %d\n", 'A' + i, root->child[i]->eval,root->child[i]->Reval);
+        getBestMove(root,!g->currP);
+        printf("notre tour = %d \n",!g->currP);
+        //printABR(root,0);
+        uint8_t pos = 0;
+        for(int i = 1; i<NB_COL;i++){
+            if(root->child[i]->Reval > root->child[pos]->Reval ){
+                pos = i;
+            }
         }
-        printf("the best move is %c with Reval of %d\n",'A' + pos,root->Reval);
+      
+        if(g->currP == 0){
+            for(int i = 0; i< NB_COL; i++){
+                printf("move %c has score of %d and Reval of %d\n", 'A' + i, root->child[i]->eval,root->child[i]->Reval);
+            }
+            printf("the best move is %c with Reval of %d\n",'A' + pos,root->child[pos]->Reval);
+        }
+      
+        //printGrille(root->child[pos]->position);
         freeAllNodes(root);
         action = jouerCoup(g);
         printGrille(g);

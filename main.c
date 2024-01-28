@@ -38,7 +38,7 @@ void generateChilds(node_t n[NB_COL]);
 void freeNode(node_t * n);
 void freeAllNodes(node_t * n);
 void construireArbre(int depth,node_t * node);
-void getBestPositon(node_t * root);
+void getBestPositon(node_t * root,uint8_t side);
 uint8_t getBestMove(node_t * root,uint8_t side);
 
 int16_t scorePosition(grille * g,uint8_t side1,char side2);
@@ -98,23 +98,24 @@ void construireArbre(int depth,node_t * node){
     }
 }
 
-void getBestPositon(node_t * root){
-    // retourne l'indice du meilleur coup
+void getBestPositon(node_t * root,uint8_t iside){
+    
     for(int i = 0; i < NB_COL ; i++){
         if(root->child[i] != NULL){
-            getBestPositon(root->child[i]);
+            getBestPositon(root->child[i],iside);
         }
 
     }
     char side[2] = {'X','O'};
-    //par du principe que X est l'IA et O l'adversaire
-    root->eval = scorePosition(root->position,side[root->position->currP],side[!root->position->currP]);  
+    
+    root->eval = scorePosition(root->position,side[iside],side[!iside]);  
 
 }
 
 uint8_t getBestMove(node_t * root,uint8_t side){
+    // retourne l'indice du meilleur coup
     uint8_t index = 0;
-    int16_t bestEval = 0;
+    int16_t bestEval = -5600;
     if(root == NULL){
         return 0;
     }
@@ -129,14 +130,14 @@ uint8_t getBestMove(node_t * root,uint8_t side){
         if(root->child[i] == NULL){
            continue;
         }
-        if(side != root->position->currP){
+        if(side == root->position->currP){
             if(root->child[i]->Reval > bestEval){
                 bestEval = root->child[i]->Reval;
                 index = i;
             }
         }
-        if(side == root->position->currP){
-            if(bestEval == 0){
+        if(side != root->position->currP){
+            if(bestEval == -5600){
                 bestEval = root->child[i]->Reval;
             }
             if(root->child[i]->Reval < bestEval){
@@ -146,7 +147,10 @@ uint8_t getBestMove(node_t * root,uint8_t side){
         }
 
     }
-
+     if(bestEval == -5600){
+        root->Reval = 0;
+        return index;
+     }
     root->Reval = root->eval + bestEval;
     return index;
 
@@ -329,10 +333,12 @@ uint8_t jetonCount(grille* g,uint8_t i, uint8_t j, uint8_t depth,char side,int d
        
         return jetonCount(g,i + dir1,j + dir2,depth - 1,side, dir1, dir2) + jetonCount(g,i + dir1,j + dir2,depth - 1,side, -dir1, -dir2);
    }
-    if(g->tab[i][j] != side){
+     
+    if(g->tab[i][j] != side && g->tab[i][j] != ' '){
        
         return -1;
-   }
+    }
+
 
    
     int8_t d  = jetonCount(g,i + dir1,j + dir2,depth - 1,side, dir1, dir2);
@@ -390,8 +396,11 @@ int main()
         g->currP = 1 - g->currP;
         node_t * root = creerNode(g);
         construireArbre(3,root);
-        getBestPositon(root);
-        uint8_t pos = getBestMove(root,g->currP);
+        getBestPositon(root,!g->currP);
+        uint8_t pos = getBestMove(root,!g->currP);
+        for(int i = 0; i< NB_COL; i++){
+            printf("move %c has score of %d and Reval of %d\n", 'A' + i, root->child[i]->eval,root->child[i]->Reval);
+        }
         printf("the best move is %c with Reval of %d\n",'A' + pos,root->Reval);
         freeAllNodes(root);
         action = jouerCoup(g);

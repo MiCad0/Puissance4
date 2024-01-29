@@ -40,6 +40,7 @@ void freeAllNodes(node_t * n);
 void construireArbre(int depth,node_t * node);
 void getBestPositon(node_t * root,uint8_t side);
 uint8_t getBestMove(node_t * root,uint8_t side);
+uint8_t isFeuille(node_t * node);
 
 int16_t scorePosition(grille * g,uint8_t side1,char side2);
 int16_t returnScoreOfJeton(int16_t sc,uint8_t side);
@@ -63,7 +64,7 @@ void generateChilds(node_t * n){
     if(n == NULL)
         return;
     for(int i = 0; i < NB_COL; i++){
-        n->child[i] = creerNode(copierGrille(n->position));
+        n->child[i] = creerNode(n->position);
         if(!permutationGrille(n->child[i]->position, 'A' + i)){
             freeNode(n->child[i]);
             n->child[i] = NULL;
@@ -112,11 +113,13 @@ void construireArbre(int depth,node_t * node){
         {
             ++coord;
         }
-        if(checkVictoireRec(node->child[i]->position,side[node->child[i]->position->currP],i,coord)){
+        if(checkVictoireRec(node->child[i]->position,'X',i,coord) || checkVictoireRec(node->child[i]->position,'O',i,coord) ){
             //printf("victoire trouver");
             continue;
+        }else{
+             construireArbre(depth - 1, node->child[i]);
         }
-        construireArbre(depth - 1, node->child[i]);
+       
     }
 }
 
@@ -133,7 +136,15 @@ void getBestPositon(node_t * root,uint8_t iside){
 
 }
 
-uint8_t getBestMove(node_t * root,uint8_t side){
+uint8_t isFeuille(node_t * node){
+    for(int i = 0; i <NB_COL; i++){
+        if(node->child[i] != NULL) return 0; ;
+        
+    }
+    return 1;
+}
+
+uint8_t getBestMove(node_t * root,uint8_t iside){
     // retourne l'indice du meilleur coup
     uint8_t index = 0;
     int16_t bestEval = -5600;
@@ -142,22 +153,27 @@ uint8_t getBestMove(node_t * root,uint8_t side){
     }
     for(int i = 0; i < NB_COL ; i++){
         if(root->child[i] != NULL){
-           index = getBestMove(root->child[i],side);
+           index = getBestMove(root->child[i],iside);
         }
 
     }
     index = 0;
+    if(isFeuille(root)){
+        char side[2] = {'O','X'};
+        root->Reval = scorePosition(root->position,side[iside],side[!iside]);  
+        return 0;
+    }
     for(int i = 0; i < NB_COL ; i++){
         if(root->child[i] == NULL){
            continue;
         }
-        if(side == root->child[i]->position->currP){
+        if(iside == root->child[i]->position->currP){
             if(root->child[i]->Reval > bestEval){
                 bestEval = root->child[i]->Reval;
                 index = i;
             }
         }
-        if(side != root->child[i]->position->currP){
+        if(iside != root->child[i]->position->currP){
             if(bestEval == -5600){
                 bestEval = root->child[i]->Reval;
             }
@@ -171,7 +187,7 @@ uint8_t getBestMove(node_t * root,uint8_t side){
      if(bestEval == -5600){
         bestEval = 0;
      }
-    root->Reval = root->eval + bestEval;
+    root->Reval = bestEval;
 
     
 
@@ -307,16 +323,17 @@ int16_t scorePosition(grille * g,uint8_t side1,char side2){
     int16_t score = 0;
     for(uint8_t i = 0; i <NB_LIGNES; i++){
         for(uint8_t j = 0; j <NB_COL; j++){
-            
-            score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,1,1),1)/2  + returnScoreOfJeton(jetonCount(g,i,j,4,side2,1,1),0)/2 ;
-            score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,1,0),1)/2 + returnScoreOfJeton(jetonCount(g,i,j,4,side2,1,0),0)/2 ;
-            score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,0,1),1)/2 + returnScoreOfJeton(jetonCount(g,i,j,4,side2,0,1),0)/2 ;
-            score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,1,-1),1)/2 + returnScoreOfJeton(jetonCount(g,i,j,4,side2,1,-1),0)/2 ;
+          
+                score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,1,1),1)  + returnScoreOfJeton(jetonCount(g,i,j,4,side2,1,1),0) ;
+                score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,1,0),1) + returnScoreOfJeton(jetonCount(g,i,j,4,side2,1,0),0) ;
+                score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,0,1),1) + returnScoreOfJeton(jetonCount(g,i,j,4,side2,0,1),0) ;
+                score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,1,-1),1) + returnScoreOfJeton(jetonCount(g,i,j,4,side2,1,-1),0) ;
 
-             score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,-1,-1),1)/2  + returnScoreOfJeton(jetonCount(g,i,j,4,side2,-1,-1),0)/2 ;
-            score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,-1,0),1)/2 + returnScoreOfJeton(jetonCount(g,i,j,4,side2,-1,0),0)/2 ;
-            score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,0,-1),1)/2 + returnScoreOfJeton(jetonCount(g,i,j,4,side2,0,-1),0)/2 ;
-            score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,-1,1),1)/2 + returnScoreOfJeton(jetonCount(g,i,j,4,side2,-1,1),0)/2;
+                score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,-1,-1),1)  + returnScoreOfJeton(jetonCount(g,i,j,4,side2,-1,-1),0) ;
+                score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,-1,0),1) + returnScoreOfJeton(jetonCount(g,i,j,4,side2,-1,0),0) ;
+                score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,0,-1),1) + returnScoreOfJeton(jetonCount(g,i,j,4,side2,0,-1),0) ;
+                score += returnScoreOfJeton(jetonCount(g,i,j,4,side1,-1,1),1) + returnScoreOfJeton(jetonCount(g,i,j,4,side2,-1,1),0);
+            
         }
     }
     return score;
@@ -424,7 +441,7 @@ int main()
         g->currP = 1 - g->currP;
         node_t * root = creerNode(g);
         construireArbre(5,root);
-        getBestPositon(root,!g->currP);
+        //getBestPositon(root,!g->currP);
         getBestMove(root,!g->currP);
         printf("notre tour = %d \n",!g->currP);
         //printABR(root,0);
@@ -451,6 +468,11 @@ int main()
             poserJeton(g, action);
         }
         else{
+             for(int i = 0; i< NB_COL; i++){
+                if(root->child[i] == NULL)continue;
+                printf("move %c has score of %d and Reval of %d\n", 'A' + i, root->child[i]->eval,root->child[i]->Reval);
+            }
+            printf("the best move is %c with Reval of %d\n",'A' + pos,root->child[pos]->Reval);
             action = jouerCoup(g);
         }
       

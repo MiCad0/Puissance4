@@ -113,7 +113,7 @@ void construireArbre(int depth,node_t * node){
         {
             ++coord;
         }
-        if(checkVictoireRec(node->child[i]->position,'X',i,coord) || checkVictoireRec(node->child[i]->position,'O',i,coord) ){
+        if(checkVictoireRec(node->child[i]->position,'X',coord,i) || checkVictoireRec(node->child[i]->position,'O',coord,i) ){
             //printf("victoire trouver");
             continue;
         }else{

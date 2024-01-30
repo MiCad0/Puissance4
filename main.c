@@ -7,8 +7,7 @@
 #define NB_COL 7
 #define AI_DEPTH 5
 
-
-
+//stocker les grilles du jeu
 
 typedef struct grille
 {
@@ -16,39 +15,54 @@ typedef struct grille
     uint16_t currP;
     uint8_t gameStatus;
 } grille;
-
+// Structure pour construire l'arbre de coup:
+//La structure utiliser est un type de liste qui en data, la grille de la position apres n coup
+//Reval qui est le score du coup et qui est assigner en remontant l'arbre ou en appelant scorePosition
+// eval est d'un reste 'dun essaie pécedent, n'est pas utiliser
 typedef struct node{
     int32_t eval;
     int32_t Reval;
     grille * position;
     struct node * child[NB_COL];
 }node_t;
+//fonction avec allocation mémoire et libération mémoire:
+grille* creerGrille();// creer une grille
+node_t * creerNode(grille *g);// creer un noeud de l'arbre
+void freeNode(node_t * n);// libère un noeud
+void freeAllNodes(node_t * n);//libère un arbre
+grille *copierGrille(grille * g);// fait une copie de la grille passer en paramettre
+void freeGrille(grille *g);//libère un grille
 
-grille* creerGrille();
-void printGrille(grille *g);
+//Fonction contruction arbre et recherche de coup
+void construireArbre(int depth,node_t * node);// construit un arbre par rapport a la racine passer en paramettre(récursif)
+uint8_t permutationGrille(grille * g, char coup);//Joue le coup @coup sur la grille g,si le coup est illégale retourne 0 sinon 1 
+void generateChilds(node_t * n);// genère le NB_COL enfant du noeud n en permutant sa grille
+uint8_t getBestMove(node_t * root,uint8_t side);// Calcule en remonte l'evaluation d'une feuille au NB_COL premier enfant
+//(^la valeur de retour n'est pas utiliser)
+void getBestPositon(node_t * root,uint8_t side);//(fonction non utiliser) évalue chaque noeud de l'arbre et le stocke dans eval
+uint8_t isFeuille(node_t * node);// retourne 1 si le noeud est une feuille sinon 0
+
+//Fonction d'évaluation de position
+int16_t scorePosition(grille * g,uint8_t side1,char side2);//retourne le score d'une position
+uint8_t jetonCount(grille* g,uint8_t i, uint8_t j, uint8_t depth,char side,int dir1,int dir2);// Compte le nombre de jeton a 4 case adjacente pour chaque case d'une grille
+int16_t returnScoreOfJeton(int16_t sc,uint8_t side);// retourne les valeurs des score en fonction du nombre de jeton detecter
+
+//Fonction de jeu
 void poserJeton(grille *g, char pos);
-void freeGrille(grille *g);
-uint8_t checkVictoireRec(grille* g, char side,int,int);
-uint8_t interCheckVictoireRec(grille* g,uint8_t i, uint8_t j, uint8_t depth,char side, int, int);
+uint8_t checkVictoireRec(grille* g, char side,int,int);// détecte une victiore en fonction du dernier coup jouer
+uint8_t interCheckVictoireRec(grille* g,uint8_t i, uint8_t j, uint8_t depth,char side, int, int);//utiliser pour detecter une victiore
+char jouerCoup(grille *g);// joue un coup
 
-char jouerCoup(grille *g);
-node_t * creerNode(grille *g);
-grille *copierGrille(grille * g);
-uint8_t permutationGrille(grille * g, char coup);
-void generateChilds(node_t n[NB_COL]);
 
-void freeNode(node_t * n);
-void freeAllNodes(node_t * n);
-void construireArbre(int depth,node_t * node);
-void getBestPositon(node_t * root,uint8_t side);
-uint8_t getBestMove(node_t * root,uint8_t side);
-uint8_t isFeuille(node_t * node);
 
-int16_t scorePosition(grille * g,uint8_t side1,char side2);
-int16_t returnScoreOfJeton(int16_t sc,uint8_t side);
 
-uint8_t jetonCount(grille* g,uint8_t i, uint8_t j, uint8_t depth,char side,int dir1,int dir2);
 
+
+
+
+
+
+void printGrille(grille *g);
 void printABR(node_t * node,int8_t depth);
 
 node_t * creerNode(grille *g){

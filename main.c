@@ -7,8 +7,8 @@
 #define NB_COL 7
 #define AI_DEPTH 5
 
-
 //stocker les grilles du jeu
+
 typedef struct grille
 {
     char **tab;

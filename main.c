@@ -490,6 +490,10 @@ int main(int argc, char* argv[])
                 }
                 continue;
             }
+            if(isFeuille(root->child[i])){
+                pos = i;
+                break;
+            }
             if(root->child[i]->Reval > root->child[pos]->Reval ){
                 pos = i;
             }

@@ -54,7 +54,7 @@ uint8_t isFeuille(node_t * node);//                     retourne 1 si le noeud e
 
 // Fonctions d'évaluation de position
 int16_t scorePosition(grille * g,uint8_t side1,char side2);//   retourne le score d'une position
-uint8_t jetonCount(grille* g,uint8_t i, uint8_t j, uint8_t depth,char side,int dir1,int dir2);// compte le nombre de jetons à 4 cases adjacentes pour chaque case d'une grille
+int8_t jetonCount(grille* g,uint8_t i, uint8_t j, uint8_t depth,char side,int dir1,int dir2);// compte le nombre de jetons à 4 cases adjacentes pour chaque case d'une grille
 int16_t returnScoreOfJeton(int16_t sc,uint8_t side);//          retourne les valeurs des score en fonction du nombre de jetons detectés
 
 // Fonctions de jeu
@@ -382,7 +382,7 @@ int16_t returnScoreOfJeton(int16_t sc,uint8_t side){
     return 0;
 }
 
-uint8_t jetonCount(grille* g,uint8_t i, uint8_t j, uint8_t depth,char side,int dir1,int dir2){
+int8_t jetonCount(grille* g,uint8_t i, uint8_t j, uint8_t depth,char side,int dir1,int dir2){
      if(i < 0 || 
         j < 0 ||
         i >= NB_LIGNES ||

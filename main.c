@@ -44,7 +44,7 @@ grille *copierGrille(grille * g);// fait une copie de la grille passée en param
 void freeGrille(grille *g);//       libère un grille
 
 // Fonctions de contruction d'arbre et de recherche de coup
-void construireArbre(int depth,node_t * node);//        construit un arbre par rapport à la racine passée en paramètre(récursif)
+void construireArbre(int16_t depth,node_t * node);//        construit un arbre par rapport à la racine passée en paramètre(récursif)
 uint8_t permutationGrille(grille * g, char coup);//     joue le coup @coup sur la grille g, si le coup est illégal retourne 0 sinon 1 
 void generateChilds(node_t * n);//                      genère le NB_COL enfant du noeud n en permutant sa grille
 uint8_t getBestMove(node_t * root,uint8_t side);//      calcule en remontant l'evaluation d'une feuille au NB_COL premier enfant
@@ -53,14 +53,14 @@ void getBestPositon(node_t * root,uint8_t side);//      (fonction non utilisée)
 uint8_t isFeuille(node_t * node);//                     retourne 1 si le noeud est une feuille sinon 0
 
 // Fonctions d'évaluation de position
-int16_t scorePosition(grille * g,uint8_t side1,char side2);//   retourne le score d'une position
-int8_t jetonCount(grille* g,uint8_t i, uint8_t j, uint8_t depth,char side,int dir1,int dir2);// compte le nombre de jetons à 4 cases adjacentes pour chaque case d'une grille
+int16_t scorePosition(grille * g,char side1,char side2);//   retourne le score d'une position
+int8_t jetonCount(grille* g,uint8_t i, uint8_t j, uint8_t depth,char side,int8_t dir1,int8_t dir2);// compte le nombre de jetons à 4 cases adjacentes pour chaque case d'une grille
 int16_t returnScoreOfJeton(int16_t sc,uint8_t side);//          retourne les valeurs des score en fonction du nombre de jetons detectés
 
 // Fonctions de jeu
 void poserJeton(grille *g, char pos);
-uint8_t checkVictoireRec(grille* g, char side,int,int);// détecte une victiore en fonction du dernier coup joué
-uint8_t interCheckVictoireRec(grille* g,uint8_t i, uint8_t j, uint8_t depth,char side, int, int);// utilisé pour detecter une victiore
+uint8_t checkVictoireRec(grille* g, char side,int8_t,int8_t);// détecte une victiore en fonction du dernier coup joué
+uint8_t interCheckVictoireRec(grille* g,uint8_t i, uint8_t j, uint8_t depth,char side, int8_t, int8_t);// utilisé pour detecter une victiore
 char jouerCoup(grille *g);// joue un coup
 
 // Fonctions d'affichage
@@ -117,16 +117,16 @@ void printABR(node_t * node,int8_t depth){
     }
 }
 
-void construireArbre(int depth,node_t * node){
+void construireArbre(int16_t depth,node_t * node){
     if(depth == 0){
         return;
     }
     
     generateChilds(node);
    
-    for(int i = 0; i <NB_COL; i++){
+    for(uint16_t i = 0; i <NB_COL; i++){
         if(node->child[i] == NULL) continue;
-        int coord = 0;
+        uint8_t coord = 0;
         while (node->child[i]->position->tab[coord][i] == ' ')
         {
             ++coord;
@@ -143,7 +143,7 @@ void construireArbre(int depth,node_t * node){
 
 void getBestPositon(node_t * root,uint8_t iside){
     
-    for(int i = 0; i < NB_COL ; i++){
+    for(uint16_t i = 0; i < NB_COL ; i++){
         if(root->child[i] != NULL){
             getBestPositon(root->child[i],iside);
         }
@@ -155,7 +155,7 @@ void getBestPositon(node_t * root,uint8_t iside){
 }
 
 uint8_t isFeuille(node_t * node){
-    for(int i = 0; i <NB_COL; i++){
+    for(uint8_t i = 0; i <NB_COL; i++){
         if(node->child[i] != NULL) return 0; ;
         
     }
@@ -169,7 +169,7 @@ uint8_t getBestMove(node_t * root,uint8_t iside){
     if(root == NULL){
         return 0;
     }
-    for(int i = 0; i < NB_COL ; i++){
+    for(uint8_t i = 0; i < NB_COL ; i++){
         if(root->child[i] != NULL){
            index = getBestMove(root->child[i],iside);
         }
@@ -181,7 +181,7 @@ uint8_t getBestMove(node_t * root,uint8_t iside){
         root->Reval = scorePosition(root->position,side[iside],side[!iside]);  
         return 0;
     }
-    for(int i = 0; i < NB_COL ; i++){
+    for(uint8_t i = 0; i < NB_COL ; i++){
         if(root->child[i] == NULL){
            continue;
         }
@@ -314,7 +314,7 @@ char jouerCoup(grille *g)
     return input;
 }
 
-uint8_t checkVictoireRec(grille* g, char side,int i ,int j){ 
+uint8_t checkVictoireRec(grille* g, char side,int8_t i ,int8_t j){ 
     
     if(interCheckVictoireRec(g,i,j,4,side,1,1)
     + interCheckVictoireRec(g,i,j,4,side,-1,-1) > 4){
@@ -337,7 +337,7 @@ uint8_t checkVictoireRec(grille* g, char side,int i ,int j){
     return 0;
 }
 
-int16_t scorePosition(grille * g,uint8_t side1,char side2){
+int16_t scorePosition(grille * g,char side1,char side2){
     int16_t score = 0;
     for(uint8_t i = 0; i <NB_LIGNES; i++){
         for(uint8_t j = 0; j <NB_COL; j++){
@@ -382,7 +382,7 @@ int16_t returnScoreOfJeton(int16_t sc,uint8_t side){
     return 0;
 }
 
-int8_t jetonCount(grille* g,uint8_t i, uint8_t j, uint8_t depth,char side,int dir1,int dir2){
+int8_t jetonCount(grille* g,uint8_t i, uint8_t j, uint8_t depth,char side,int8_t dir1,int8_t dir2){
      if(i < 0 || 
         j < 0 ||
         i >= NB_LIGNES ||
@@ -417,7 +417,7 @@ int8_t jetonCount(grille* g,uint8_t i, uint8_t j, uint8_t depth,char side,int di
     
 }
 
-uint8_t interCheckVictoireRec(grille* g,uint8_t i, uint8_t j, uint8_t depth,char side,int dir1,int dir2){
+uint8_t interCheckVictoireRec(grille* g,uint8_t i, uint8_t j, uint8_t depth,char side,int8_t dir1,int8_t dir2){
     if(i < 0 || 
         j < 0 ||
         i >= NB_LIGNES ||
@@ -483,7 +483,7 @@ int main(int argc, char* argv[])
             printf("notre tour = %d \n",!g->currP);
         //printABR(root,0);
         uint8_t pos = 0;
-        for(int i = 0; i<NB_COL;i++){
+        for(uint8_t i = 0; i<NB_COL;i++){
             if(root->child[i] == NULL){
                 if(pos == i){
                     pos++;
@@ -500,7 +500,7 @@ int main(int argc, char* argv[])
         }
       
         if(g->currP == IA ){
-            for(int i = 0; i< NB_COL; i++){
+            for(uint8_t i = 0; i< NB_COL; i++){
                 if(root->child[i] == NULL)continue;
                 if(DEBUG)
                     printf("move %c has score of %d and Reval of %d\n", 'A' + i, root->child[i]->eval,root->child[i]->Reval);
@@ -511,7 +511,7 @@ int main(int argc, char* argv[])
             poserJeton(g, input);
         }
         else{
-             for(int i = 0; i< NB_COL; i++){
+             for(uint8_t i = 0; i< NB_COL; i++){
                 if(root->child[i] == NULL)continue;
                 if(DEBUG)
                     printf("move %c has score of %d and Reval of %d\n", 'A' + i, root->child[i]->eval,root->child[i]->Reval);

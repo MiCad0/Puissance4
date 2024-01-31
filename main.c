@@ -535,7 +535,7 @@ int main(int argc, char* argv[])
             joueur[1] = "humain 2";
         }
         
-        printf("Le joueur %s a joué le coup %c\n", joueur[g->currP], input);
+        printf("Le joueur %s a joué le coup %c\n", IA == 0 ? joueur[!g->currP]: joueur[g->currP], input);
         while (g->tab[coord][input - 'A'] == ' ')
         {
             ++coord;

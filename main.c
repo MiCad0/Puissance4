@@ -2,10 +2,15 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <assert.h>
+#include <string.h>
+#include <unistd.h>
 
 #define NB_LIGNES 6
 #define NB_COL 7
 #define AI_DEPTH 5
+
+uint8_t IA = 2;
+uint8_t DEBUG = 0;
 
 //stocker les grilles du jeu
 
@@ -54,14 +59,6 @@ uint8_t interCheckVictoireRec(grille* g,uint8_t i, uint8_t j, uint8_t depth,char
 char jouerCoup(grille *g);// joue un coup
 
 
-
-
-
-
-
-
-
-
 void printGrille(grille *g);
 void printABR(node_t * node,int8_t depth);
 
@@ -108,7 +105,8 @@ void printABR(node_t * node,int8_t depth){
     for(int i = 0; i <NB_COL; i++){
         if(node->child[i] == NULL) continue;
         printABR(node->child[i],depth + 1);
-        printf("prof %d, enfant %d, cuurp = %d , eval = %d, Reval = %d \n",depth,i,node->child[i]->position->currP,node->child[i]->eval,node->child[i]->Reval);
+        if(DEBUG)
+            printf("prof %d, enfant %d, cuurp = %d , eval = %d, Reval = %d \n",depth,i,node->child[i]->position->currP,node->child[i]->eval,node->child[i]->Reval);
         printGrille(node->child[i]->position);
         printf("\n");
     }
@@ -130,7 +128,7 @@ void construireArbre(int depth,node_t * node){
             ++coord;
         }
         if(checkVictoireRec(node->child[i]->position,'X',coord,i) || checkVictoireRec(node->child[i]->position,'O',coord,i) ){
-            //printf("victoire trouver");
+            //printf("victoire trouvée");
             continue;
         }else{
              construireArbre(depth - 1, node->child[i]);
@@ -266,16 +264,17 @@ grille *creerGrille()
 
 void printGrille(grille *g)
 {
-    printf("  A  B  C  D  E  F  G  \n");
+    printf("    A  B  C  D  E  F  G\n");
     for (uint8_t i = 0; i < NB_LIGNES; ++i)
     {
+        printf("⬛ ");
         for (uint8_t j = 0; j < NB_COL; ++j)
         {
-            printf("||%c", g->tab[i][j]);
+            printf("%s ", (g->tab[i][j] == ' ' ? "🟦" : (g->tab[i][j] == 'X' ? "🔴": "🟡")));
         }
-        printf("||\n");
+        printf("⬛\n");
     }
-    printf("=======================\n\n");
+    printf("⬛ ⬛ ⬛ ⬛ ⬛ ⬛ ⬛ ⬛ ⬛\n\n");
 }
 
 void poserJeton(grille *g, char pos)
@@ -291,45 +290,46 @@ void poserJeton(grille *g, char pos)
 
 char jouerCoup(grille *g)
 {
-    char action = 'A';
+    char input = 'A';
+
     printf("Joueur %d à toi de jouer!\n", g->currP + 1);
-    scanf(" %c", &action);
+    scanf(" %c", &input);
     chercherCoup:
-    while ((action > 'G')||(action < 'A')){
+    while ((input > 'G')||(input < 'A')){
         printf("Coup non valide, veillez entrez une lettre entre A et G.\n");
-        scanf(" %c", &action);
+        scanf(" %c", &input);
     }
-    if (g->tab[0][action-'A'] != ' ')
+    if (g->tab[0][input-'A'] != ' ')
     {
         printf("Cette colonne est pleine!\n");
-        action = ' ';
+        input = ' ';
         goto chercherCoup;
     }
     
-    poserJeton(g, action);
-    return action;
+    poserJeton(g, input);
+    return input;
 }
 
 uint8_t checkVictoireRec(grille* g, char side,int i ,int j){
         //printf("pre: %c;%c,(%d,%d)\n", side, g->tab[i][j], i, j);
+            
     
-            if(interCheckVictoireRec(g,i,j,4,side,1,1)
-            + interCheckVictoireRec(g,i,j,4,side,-1,-1) > 4){
-                return side;
-            }  
-            if(interCheckVictoireRec(g,i,j,4,side,0,1)
-            + interCheckVictoireRec(g,i,j,4,side,0,-1) > 4){
-                return side;
-            }  
-            if(interCheckVictoireRec(g,i,j,4,side,1,0)
-            + interCheckVictoireRec(g,i,j,4,side,-1,0) > 4){
-                return side;
-            }
-            if(interCheckVictoireRec(g,i,j,4,side,1,-1)
-            + interCheckVictoireRec(g,i,j,4,side,-1,1) > 4){
-                return side;
-            }
-
+    if(interCheckVictoireRec(g,i,j,4,side,1,1)
+    + interCheckVictoireRec(g,i,j,4,side,-1,-1) > 4){
+        return side;
+    }  
+    if(interCheckVictoireRec(g,i,j,4,side,0,1)
+    + interCheckVictoireRec(g,i,j,4,side,0,-1) > 4){
+        return side;
+    }  
+    if(interCheckVictoireRec(g,i,j,4,side,1,0)
+    + interCheckVictoireRec(g,i,j,4,side,-1,0) > 4){
+        return side;
+    }
+    if(interCheckVictoireRec(g,i,j,4,side,1,-1)
+    + interCheckVictoireRec(g,i,j,4,side,-1,1) > 4){
+        return side;
+    }
         
     
     return 0;
@@ -446,10 +446,30 @@ void freeGrille(grille *g)
     free(g);
 }
 
-int main()
+int main(int argc, char* argv[])
 {
     grille *g = creerGrille();
-    char action;
+    char input;
+    char* titleScreen = ".............................................................................................................................................................\n.......PPPPPPPPPP...UUUU..UUUU...IIII.....SSSSSSS........SSSSSSS........AAAAAA.........NNNNNNN......NNNN......CCCCCC.......EEEEEEEEE......444444.............\n......PPPP..PPPP...UUUU..UUUU...IIII...SSSS.....SSS...SSSS.....SSS.....AAAAAAA........NNNN.NNNN....NNNN....CCCC...CCCC....EEEE.........44444444..............\n.....PPPPPPPPPP...UUUU..UUUU...IIII.......SSSS...........SSSS.........AAAA.AAA.......NNNN..NNNN...NNNN....CCCC...........EEEE.......4444..4444...............\n....PPPP.........UUUU..UUUU...IIII..........SSSS...........SSSS......AAAAAAAAA......NNNN...NNNN..NNNN....CCCC...........EEEEEEE...4444444444444..............\n...PPPP.........UUUU..UUUU...IIII....SSSS.....SSSS..SSSS.....SSSS...AAAA...AAA.....NNNN....NNNN.NNNN....CCCC...CCCC....EEEE.............4444.................\n..PPPP.........UUUUUUUUUU...IIII.......SSSSSSS........SSSSSSS......AAAA....AAA....NNNN......NNNNNNN.......CCCCCC......EEEEEEEEEE.......4444..................\n.............................................................................................................................................................\n";
+    for (uint16_t i = 0; i < strlen(titleScreen) ; i++)
+    {
+        printf("%c",titleScreen[i]);
+        fflush(NULL);
+        usleep(500);
+    }
+    usleep(500000);
+    
+    if (argc>1)
+    {
+        IA = atoi(argv[1]);
+    }
+    
+    if(argc>2){
+        DEBUG = atoi(argv[2]);
+    }
+    if(DEBUG)
+        printf("IA = %d \n", IA);
+
 
     printGrille(g);
     g->currP = 1 - g->currP;
@@ -459,7 +479,8 @@ int main()
         construireArbre(AI_DEPTH,root);
         //getBestPositon(root,!g->currP);
         getBestMove(root,!g->currP);
-        printf("notre tour = %d \n",!g->currP);
+        if(DEBUG)
+            printf("notre tour = %d \n",!g->currP);
         //printABR(root,0);
         uint8_t pos = 0;
         for(int i = 0; i<NB_COL;i++){
@@ -474,22 +495,26 @@ int main()
             }
         }
       
-        if(g->currP == 0 ){
+        if(g->currP == IA ){
             for(int i = 0; i< NB_COL; i++){
                 if(root->child[i] == NULL)continue;
-                printf("move %c has score of %d and Reval of %d\n", 'A' + i, root->child[i]->eval,root->child[i]->Reval);
+                if(DEBUG)
+                    printf("move %c has score of %d and Reval of %d\n", 'A' + i, root->child[i]->eval,root->child[i]->Reval);
             }
-            printf("the best move is %c with Reval of %d\n",'A' + pos,root->child[pos]->Reval);
-            action = 'A' + pos;
-            poserJeton(g, action);
+            if(DEBUG)
+                printf("the best move is %c with Reval of %d\n",'A' + pos,root->child[pos]->Reval);
+            input = 'A' + pos;
+            poserJeton(g, input);
         }
         else{
              for(int i = 0; i< NB_COL; i++){
                 if(root->child[i] == NULL)continue;
-                printf("move %c has score of %d and Reval of %d\n", 'A' + i, root->child[i]->eval,root->child[i]->Reval);
+                if(DEBUG)
+                    printf("move %c has score of %d and Reval of %d\n", 'A' + i, root->child[i]->eval,root->child[i]->Reval);
             }
-            printf("the best move is %c with Reval of %d\n",'A' + pos,root->child[pos]->Reval);
-            action = jouerCoup(g);
+            if(DEBUG)
+                printf("the best move is %c with Reval of %d\n",'A' + pos,root->child[pos]->Reval);
+            input = jouerCoup(g);
         }
       
         //printGrille(root->child[pos]->position);
@@ -499,20 +524,41 @@ int main()
         printGrille(g);
         uint8_t coord = 0;
         char pion[2] = {'X', 'O'};
-        printf("action = %c\n",action);
-        while (g->tab[coord][action - 'A'] == ' ')
+        char* joueur[2] = {"humain", "IA"};
+        if (IA == 2)
+        {
+            joueur[0] = "humain 1";
+            joueur[1] = "humain 2";
+        }
+        
+        printf("Le joueur %s a joué le coup %c\n", joueur[g->currP], input);
+        while (g->tab[coord][input - 'A'] == ' ')
         {
             ++coord;
         }
-        if(checkVictoireRec(g,pion[g->currP] ,coord,action - 'A') != 0){
-            g->gameStatus = 1;
-            printf("Bravo, le joueur %d a gagné\n Voulez-vous rejouer? [y/n] \n", g->currP + 1);
-            scanf(" %c", &action);
-            if(action == 'y'){
-                freeGrille(g);
-                g = creerGrille();
-                g->currP = 1 - g->currP;}
-        }
+        g->gameStatus = checkVictoireRec(g,pion[g->currP] ,coord,input - 'A');
+        switch (g->gameStatus)
+            {
+            case 'O':
+            case 'X':
+                printf("Bravo, le joueur %s a gagné\n Voulez-vous rejouer? [y/n] \n", joueur[g->currP]);
+                scanf(" %c", &input);
+                if(input == 'y'){
+                    freeGrille(g);
+                    g = creerGrille();
+                    g->currP = 1 - g->currP;}
+                break;
+            case 2:
+                printf("Égalité! Personne n'a perdu, personne n'a gagné!\n Voulez-vous rejouer? [y/n] \n");
+                scanf(" %c", &input);
+                if(input == 'y'){
+                    freeGrille(g);
+                    g = creerGrille();
+                    g->currP = 1 - g->currP;}
+                break;
+            default:
+                break;
+            }
     }
     freeGrille(g);
     return EXIT_SUCCESS;

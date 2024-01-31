@@ -118,7 +118,6 @@ void construireArbre(int depth,node_t * node){
     }
     
     generateChilds(node);
-    char side[2] = {'X','O'};
    
     for(int i = 0; i <NB_COL; i++){
         if(node->child[i] == NULL) continue;
@@ -310,9 +309,7 @@ char jouerCoup(grille *g)
     return input;
 }
 
-uint8_t checkVictoireRec(grille* g, char side,int i ,int j){
-        //printf("pre: %c;%c,(%d,%d)\n", side, g->tab[i][j], i, j);
-            
+uint8_t checkVictoireRec(grille* g, char side,int i ,int j){ 
     
     if(interCheckVictoireRec(g,i,j,4,side,1,1)
     + interCheckVictoireRec(g,i,j,4,side,-1,-1) > 4){
@@ -431,8 +428,6 @@ uint8_t interCheckVictoireRec(grille* g,uint8_t i, uint8_t j, uint8_t depth,char
     }
     uint8_t d;
     d = interCheckVictoireRec(g,i + dir1,j + dir2,depth - 1,side, dir1, dir2);
-    
-    //int d[8] = interCheckVictoireRec(g,i,j,depth - 1,side );
     return d+1;
 }
 
@@ -450,7 +445,7 @@ int main(int argc, char* argv[])
 {
     grille *g = creerGrille();
     char input;
-    char* titleScreen = ".............................................................................................................................................................\n.......PPPPPPPPPP...UUUU..UUUU...IIII.....SSSSSSS........SSSSSSS........AAAAAA.........NNNNNNN......NNNN......CCCCCC.......EEEEEEEEE......444444.............\n......PPPP..PPPP...UUUU..UUUU...IIII...SSSS.....SSS...SSSS.....SSS.....AAAAAAA........NNNN.NNNN....NNNN....CCCC...CCCC....EEEE.........44444444..............\n.....PPPPPPPPPP...UUUU..UUUU...IIII.......SSSS...........SSSS.........AAAA.AAA.......NNNN..NNNN...NNNN....CCCC...........EEEE.......4444..4444...............\n....PPPP.........UUUU..UUUU...IIII..........SSSS...........SSSS......AAAAAAAAA......NNNN...NNNN..NNNN....CCCC...........EEEEEEE...4444444444444..............\n...PPPP.........UUUU..UUUU...IIII....SSSS.....SSSS..SSSS.....SSSS...AAAA...AAA.....NNNN....NNNN.NNNN....CCCC...CCCC....EEEE.............4444.................\n..PPPP.........UUUUUUUUUU...IIII.......SSSSSSS........SSSSSSS......AAAA....AAA....NNNN......NNNNNNN.......CCCCCC......EEEEEEEEEE.......4444..................\n.............................................................................................................................................................\n";
+    char* titleScreen = "..................................................................................................................................................\n.......PPPPPPPPPP...UUUU..UUUU...IIII.....SSSSSSS........SSSSSSS........AAAAAA.........NNNNNNN......NNNN......CCCCCC.......EEEEEEEEE......444444..\n......PPPP..PPPP...UUUU..UUUU...IIII...SSSS.....SSS...SSSS.....SSS.....AAAAAAA........NNNN.NNNN....NNNN....CCCC...CCCC....EEEE.........44444444...\n.....PPPPPPPPPP...UUUU..UUUU...IIII.......SSSS...........SSSS.........AAAA.AAA.......NNNN..NNNN...NNNN....CCCC...........EEEE.......4444..4444....\n....PPPP.........UUUU..UUUU...IIII..........SSSS...........SSSS......AAAAAAAAA......NNNN...NNNN..NNNN....CCCC...........EEEEEEE...4444444444444...\n...PPPP.........UUUU..UUUU...IIII....SSSS.....SSSS..SSSS.....SSSS...AAAA...AAA.....NNNN....NNNN.NNNN....CCCC...CCCC....EEEE.............4444......\n..PPPP.........UUUUUUUUUU...IIII.......SSSSSSS........SSSSSSS......AAAA....AAA....NNNN......NNNNNNN.......CCCCCC......EEEEEEEEEE.......4444.......\n..................................................................................................................................................\n";
     for (uint16_t i = 0; i < strlen(titleScreen) ; i++)
     {
         printf("%c",titleScreen[i]);
